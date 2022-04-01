@@ -9,6 +9,7 @@ contract NftScratch {
         uint256 price;
         bool isOnSale;
         bool exists;
+        bool isAuctionable;
         address owner;
     }
 
@@ -21,7 +22,8 @@ contract NftScratch {
         string memory _name,
         bool _isOnSale,
         uint256 _price,
-        string memory _nftHash
+        string memory _nftHash,
+        bool _isAuctionable
     ) public {
         MyNft storage nft = fetchNft[_name];
         require(!nft.exists, "The Nft already Exists");
@@ -32,7 +34,18 @@ contract NftScratch {
         nft.owner = msg.sender;
         nft.price = _price * 1 ether;
         nft.exists = true;
+        nft.isAuctionable = _isAuctionable;
         counter = nft.id;
+    }
+
+    function modifySaleStatus(string memory _nftName, bool _isOnSale) public {
+        MyNft storage nft = fetchNft[_nftName];
+        require(nft.owner == msg.sender, "You are not the owner of this Nft");
+        require(
+            nft.isOnSale != _isOnSale,
+            "You can't change the sale status to the same value"
+        );
+        nft.isOnSale = _isOnSale;
     }
 
     function burnNft(string memory _name) public {
